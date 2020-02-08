@@ -1,0 +1,17 @@
+---
+- name: Check if cluster exists
+  stat:
+    path: /etc/kubernetes/admin.conf
+  register: result
+
+- name: Pull kubeadm images
+  shell: kubeadm config images pull
+  when: not result.stat.exists
+
+- name: Initialize cluster
+  shell: >
+    kubeadm join \
+    --token {{ kubeadm_token }} \
+    --discovery-token-unsafe-skip-ca-verification \
+    {{ groups['master'][0] }}:6443
+  when: not result.stat.exists

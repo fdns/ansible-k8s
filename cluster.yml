@@ -1,0 +1,27 @@
+---
+# Shared config
+- hosts:
+  - master
+  - slave
+  roles:
+    - docker
+    - ssh-keys
+    - kubelet
+  become: true
+
+- hosts:
+  - master
+  roles:
+    - wireguard
+    - kubeadm-master
+  become: true
+
+- hosts:
+  - master
+  roles:
+    - kubernetes-users
+
+- hosts:
+  - slave
+  roles:
+    - kubeadm-slave

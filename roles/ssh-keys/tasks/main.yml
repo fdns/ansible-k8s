@@ -1,0 +1,15 @@
+---
+
+- name: Set keys
+  authorized_key:
+    user: "{{ ssh_keys_username }}"
+    state: present
+    key: '{{ item }}'
+  loop: "{{ ssh_keys }}"
+    
+- name: Remove deprecated keys
+  authorized_key:
+    user: "{{ ssh_keys_username }}"
+    state: absent
+    key: '{{ item }}'
+  loop: "{{ ssh_keys_deprecated }}"

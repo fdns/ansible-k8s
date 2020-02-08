@@ -1,0 +1,49 @@
+---
+- name: Install pip
+  yum:
+    name: python-pip
+    state: present
+  become: true
+
+- name: Install pip dependencies
+  pip:
+    name:
+      - openshift>=0.6
+  become: true
+
+- name: Add fdns certificate signing request
+  k8s:
+    state: present
+    definition: "{{ lookup('file', 'fdns-cert.yml') }}"
+  register: csr
+
+- name: Approve certificate request
+  shell: kubectl certificate approve fdns
+  when: csr.changed
+
+- name: Create fdns rolebind
+  k8s:
+    state: present
+    definition: "{{ lookup('file', 'fdns-role.yml') }}"
+
+- name: Get kubernetes CA
+  shell: cat /etc/kubernetes/pki/ca.crt | base64 | tr -d '\n'
+  register: ca
+
+- name: Get fdns certificate
+  shell: kubectl get csr fdns -o jsonpath='{.status.certificate}'
+  register: fdns_csr
+
+- name: Generate fdns configuration
+  shell: >
+    export KUBECONFIG={{ playbook_dir }}/fdns.conf && \
+    kubectl config set-cluster kubernetes \
+      --server=https://{{ ansible_eth0.ipv4.address }}:6443 \
+    && kubectl config set clusters.kubernetes.certificate-authority-data {{ ca.stdout }} \
+    && kubectl config set-context kubernetes --cluster=kubernetes --user=fdns \
+    && kubectl config use-context kubernetes \
+    && kubectl config set-credentials fdns --username fdns \
+    && kubectl config set users.fdns.client-certificate-data {{ fdns_csr.stdout }} \
+    && kubectl config set users.fdns.client-key-data {{ fdns_private_key }}
+  delegate_to: localhost
+  #no_log: True

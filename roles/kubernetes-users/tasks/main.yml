@@ -38,7 +38,7 @@
   shell: >
     export KUBECONFIG={{ playbook_dir }}/fdns.conf && \
     kubectl config set-cluster kubernetes \
-      --server=https://{{ ansible_eth0.ipv4.address }}:6443 \
+      --server=https://k8s.espinoza.dev:6443 \
     && kubectl config set clusters.kubernetes.certificate-authority-data {{ ca.stdout }} \
     && kubectl config set-context kubernetes --cluster=kubernetes --user=fdns \
     && kubectl config use-context kubernetes \

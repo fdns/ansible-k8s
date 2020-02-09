@@ -12,7 +12,6 @@
 - hosts:
   - master
   roles:
-    - wireguard
     - kubeadm-master
   become: true
 

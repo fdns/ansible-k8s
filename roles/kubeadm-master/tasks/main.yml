@@ -12,8 +12,9 @@
   shell: >
     kubeadm init \
     --token {{ kubeadm_token }} \
+    --apiserver-cert-extra-sans k8s.espinoza.dev \
     --token-ttl 10m \
-    --pod-network-cidr 10.248.0.0/16
+    --pod-network-cidr 192.168.0.0/16
     #--control-plane-endpoint {{ groups['master'][0] }} \ # Needed for HA
   when: not result.stat.exists
 
@@ -23,6 +24,19 @@
     port: 6443
   when: not result.stat.exists
 
+- name: Copy admin.conf to root
+  shell: >
+   mkdir -p /root/.kube && \
+   cp /etc/kubernetes/admin.conf /root/.kube/config
+  when: not result.stat.exists
+
+- name: Copy admin.conf to ec2-user
+  shell: >
+    sudo -u ec2-user mkdir -p /home/ec2-user/.kube && \
+    cp /etc/kubernetes/admin.conf /home/ec2-user/.kube/config && \
+    chown ec2-user:ec2-user /home/ec2-user/.kube/config
+  when: not result.stat.exists
+
 - name: Apply Calico network
   shell: kubectl apply -f https://docs.projectcalico.org/v3.11/manifests/calico.yaml
   when: not result.stat.exists
@@ -30,11 +44,3 @@
 - name: Allow the schedule of nodes in master
   shell: kubectl taint nodes --all node-role.kubernetes.io/master-
   when: not result.stat.exists
-
-- name: Copy admin.conf
-  shell: >
-    sudo -u ec2-user mkdir -p /home/ec2-user/.kube && \
-    cp -i /etc/kubernetes/admin.conf /home/ec2-user/.kube/config && \
-    chown ec2-user:ec2-user /home/ec2-user/.kube/config
-  when: not result.stat.exists
-

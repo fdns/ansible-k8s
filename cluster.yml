@@ -24,3 +24,9 @@
   - slave
   roles:
     - kubeadm-slave
+
+# Extra services
+- hosts:
+  - master
+  roles:
+  - kubernetes-services

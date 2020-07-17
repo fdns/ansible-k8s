@@ -1,7 +1,0 @@
-[master]
-k8s.espinoza.dev
-
-[slave]
-
-[all:vars]
-ansible_user=ec2-user

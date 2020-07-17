@@ -1,7 +1,7 @@
 ---
 # Shared config
 - hosts:
-  - master
+  - tag_project_cloud
   - slave
   roles:
     - docker
@@ -10,13 +10,14 @@
   become: true
 
 - hosts:
-  - master
+  - tag_project_cloud
   roles:
     - kubeadm-master
+    - cloudflare-dns
   become: true
 
 - hosts:
-  - master
+  - tag_project_cloud
   roles:
     - kubernetes-users
 
@@ -27,6 +28,6 @@
 
 # Extra services
 - hosts:
-  - master
+  - tag_project_cloud
   roles:
   - kubernetes-services

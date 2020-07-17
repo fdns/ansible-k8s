@@ -15,7 +15,6 @@
     --apiserver-cert-extra-sans k8s.espinoza.dev \
     --token-ttl 10m \
     --pod-network-cidr 192.168.0.0/16
-    #--control-plane-endpoint {{ groups['master'][0] }} \ # Needed for HA
   when: not result.stat.exists
 
 - name: Wait for cluster

@@ -9,9 +9,7 @@
     state: present
     definition: "{{ lookup('file', 'masterk.key') }}"
 
-- name: Create sealed-secrets
-  shell: >
-    export KUBECONFIG={{ playbook_dir }}/fdns.conf && \
-    cd {{ role_path }}/files && \
-    helmfile sync
-  delegate_to: localhost
+- name: Install sealed-secrets
+  k8s:
+    state: present
+    definition: "{{ lookup('file', 'sealed-secrets.yaml') }}"

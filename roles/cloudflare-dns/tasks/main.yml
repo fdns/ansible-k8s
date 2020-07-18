@@ -20,6 +20,7 @@
     zone: espinoza.dev
     record: k8s
     type: A
+    ttl: 120
     proxied: no
     solo: yes
     value: '{{ ec2_ip_address }}'

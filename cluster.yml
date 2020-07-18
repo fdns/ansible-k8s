@@ -31,3 +31,4 @@
   - tag_project_cloud
   roles:
   - kubernetes-services
+  - sealed-secrets

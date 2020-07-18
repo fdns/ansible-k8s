@@ -11,18 +11,18 @@
     state: present
   loop: "{{ lookup('template', '{{ role_path }}/files/nginx-ingress.yml') | from_yaml_all | list }}"
 
-- name: Add cert-manager
-  k8s:
-    definition: "{{ item }}"
-    state: present
-  loop: '{{ lookup("url", "https://github.com/jetstack/cert-manager/releases/download/v0.15.1/cert-manager.yaml", split_lines=False) | from_yaml_all | list }}'
-
-- name: Add cert-manager ACME client
-  k8s:
-    definition: "{{ item }}"
-    state: present
-  loop: "{{ lookup('template', '{{ role_path }}/files/cert-manager-acme.yml') | from_yaml_all | list }}"
-  register: result
-  retries: 5
-  delay: 2
-  until: result is not failed
+#- name: Add cert-manager
+#  k8s:
+#    definition: "{{ item }}"
+#    state: present
+#  loop: '{{ lookup("url", "https://github.com/jetstack/cert-manager/releases/download/v0.15.1/cert-manager.yaml", split_lines=False) | from_yaml_all | list }}'
+#
+#- name: Add cert-manager ACME client
+#  k8s:
+#    definition: "{{ item }}"
+#    state: present
+#  loop: "{{ lookup('template', '{{ role_path }}/files/cert-manager-acme.yml') | from_yaml_all | list }}"
+#  register: result
+#  retries: 5
+#  delay: 2
+#  until: result is not failed

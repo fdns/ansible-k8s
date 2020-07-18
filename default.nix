@@ -5,6 +5,7 @@ stdenv.mkDerivation {
   buildInputs = [
     # System requirements.
     readline
+    openssl
 
     # Python requirements (enough to get a virtualenv going).
     python3Full

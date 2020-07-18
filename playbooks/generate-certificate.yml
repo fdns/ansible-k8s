@@ -1,0 +1,123 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+  - set_fact:
+      working_directory: "{{ playbook_dir }}/../tmp/certificate"
+      acme_directory: "{{ playbook_dir }}/../tmp/certificate/acme"
+      domains:
+        - "edx.k8s.espinoza.dev"
+        - "*.edx.k8s.espinoza.dev"
+
+  - name: Create working working directory
+    file:
+      path: "{{ item }}"
+      state: directory
+      mode: '0700'
+    loop:
+      - "{{ working_directory }}"
+  
+  - name: Generate the private key
+    command: "openssl genrsa -out \"{{ working_directory }}/certificate-key.pem\" 2048"
+    args:
+      creates: "{{ working_directory }}/certificate-key.pem"
+
+  - name: Generate openssl configuration file
+    copy:
+      content: "{{ 'W3JlcV0KcmVxX2V4dGVuc2lvbnMgPSB2M19yZXEKZGlzdGluZ3Vpc2hlZF9uYW1lID0gcmVxX2Rpc3Rpbmd1aXNoZWRfbmFtZQoKWyByZXFfZGlzdGluZ3Vpc2hlZF9uYW1lIF0KClsgdjNfcmVxIF0KYmFzaWNDb25zdHJhaW50cyA9IENBOkZBTFNFCmtleVVzYWdlID0gZGlnaXRhbFNpZ25hdHVyZSwga2V5RW5jaXBoZXJtZW50Cg==' | b64decode }}"
+      dest: "{{ working_directory }}/openssl-request.conf"
+
+  - name: Generate CSR
+    command: |
+      openssl req -new -sha256 -subj "/CN=espinoza.dev"
+      -addext "subjectAltName = DNS:{{ domains|join(',DNS:') }}"
+      -key "{{ working_directory }}/certificate-key.pem"
+      -out "{{ working_directory }}/certificate.csr"
+
+  - name: Remove openssl configuration
+    file:
+      path: "{{ working_directory }}/openssl-request.conf"
+      state: absent
+  
+  - name: Generate Let's Encrypt account key
+    command: "openssl genrsa -out \"{{ working_directory }}/letsencrypt-key.pem\" 2048"
+    args:
+      creates: "{{ working_directory }}/letsencrypt-key.pem"
+
+  - name: Initiate the Let's Encrypt challenge
+    acme_certificate:
+      acme_directory: https://acme-staging-v02.api.letsencrypt.org/directory
+      acme_version: 2
+      challenge: dns-01
+      account_key: "{{ working_directory }}/letsencrypt-key.pem"
+      csr: "{{ working_directory }}/certificate.csr"
+      dest: "{{ working_directory }}/certificate.pem"
+      account_email: "{{ acme_account_email }}"
+      remaining_days: 2
+      terms_agreed: yes
+    register: letsencrypt_challenge
+
+  - debug:
+      var: letsencrypt_challenge
+  
+  - name: Create DNS Records
+    cloudflare_dns:
+      zone: espinoza.dev
+      record: "{{ item.value['dns-01']['record'] }}"
+      type: TXT
+      solo: no
+      value: "\"{{ item.value['dns-01']['resource_value'] }}\""
+      account_email: '{{ cloudflare_api_user }}'
+      account_api_token: '{{ cloudflare_api_token }}'
+    with_dict: "{{ letsencrypt_challenge['challenge_data'] | default({}) }}"
+    when: letsencrypt_challenge['challenge_data'] is defined
+
+  - name: Validate the Let's Encrypt challenge
+    acme_certificate:
+      acme_directory: https://acme-staging-v02.api.letsencrypt.org/directory
+      acme_version: 2
+      challenge: dns-01
+      account_key: "{{ working_directory }}/letsencrypt-key.pem"
+      csr: "{{ working_directory }}/certificate.csr"
+      dest: "{{ working_directory }}/certificate.pem"
+      account_email: "{{ acme_account_email }}"
+      data: "{{ letsencrypt_challenge }}"
+      remaining_days: 2
+      terms_agreed: yes
+    register: letsencrypt_validation
+    retries: 3
+    delay: 10
+    until: letsencrypt_validation is success
+    when: letsencrypt_challenge['challenge_data'] is defined
+  
+  - name: Delete DNS records
+    cloudflare_dns:
+      zone: espinoza.dev
+      record: "{{ item.value['dns-01']['record'] }}"
+      type: TXT
+      state: absent
+      #value: "\"{{ item.value['dns-01']['resource_value'] }}\""
+      account_email: '{{ cloudflare_api_user }}'
+      account_api_token: '{{ cloudflare_api_token }}'
+    with_dict: "{{ letsencrypt_challenge['challenge_data'] | default({}) }}"
+    when: letsencrypt_challenge['challenge_data'] is defined
+
+  - name: Download Let's Encrypt intermediate CA
+    get_url:
+      url: https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
+      dest: "{{ working_directory }}/letsencrypt-intermediate.pem"
+
+  - name: Get the certificate content
+    command: "cat {{ working_directory }}/certificate.pem"
+    register: certificate_content
+    changed_when: false
+
+  - name: Get intermediate content
+    command: "cat {{ working_directory }}/letsencrypt-intermediate.pem"
+    register: intermediate_content
+    changed_when: false
+
+  - name: Create full chain
+    copy:
+      content: "{{ certificate_content['stdout'] + '\n' + intermediate_content['stdout'] }}"
+      dest: "{{ working_directory }}/certificate-fullchain.pem"

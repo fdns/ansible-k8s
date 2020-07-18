@@ -4,16 +4,14 @@
     zone: espinoza.dev
     record: '{{ item }}'
     type: A
-    proxied: yes
+    proxied: no
     solo: yes
     value: '{{ ec2_ip_address }}'
     account_email: '{{ cloudflare_api_user }}'
     account_api_token: '{{ cloudflare_api_token }}'
   loop:
     - edx.k8s
-    - studio.edx.k8s
-    - preview.edx.k8s
-    - s3.edx.k8s
+    - "*.edx.k8s"
 
 - name: Setup main k8s entrypoint
   cloudflare_dns:

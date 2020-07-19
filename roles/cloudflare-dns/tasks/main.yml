@@ -1,18 +1,4 @@
 ---
-- name: Setup cloudflare master ingress dns
-  cloudflare_dns:
-    zone: espinoza.dev
-    record: '{{ item }}'
-    type: A
-    proxied: no
-    solo: yes
-    value: '{{ ec2_ip_address }}'
-    account_email: '{{ cloudflare_api_user }}'
-    account_api_token: '{{ cloudflare_api_token }}'
-  loop:
-    - edx.k8s
-    - "*.edx.k8s"
-
 - name: Setup main k8s entrypoint
   cloudflare_dns:
     zone: espinoza.dev
@@ -24,3 +10,17 @@
     value: '{{ ec2_ip_address }}'
     account_email: '{{ cloudflare_api_user }}'
     account_api_token: '{{ cloudflare_api_token }}'
+
+- name: Setup cloudflare CNAMES
+  cloudflare_dns:
+    zone: espinoza.dev
+    record: '{{ item }}'
+    type: CNAME
+    proxied: no
+    solo: yes
+    value: 'k8s.espinoza.dev'
+    account_email: '{{ cloudflare_api_user }}'
+    account_api_token: '{{ cloudflare_api_token }}'
+  loop:
+    - edx.k8s
+    - "*.edx.k8s"

@@ -1,0 +1,22 @@
+---
+- name: Install dependencies
+  yum:
+    name: iscsi-initiator-utils
+    state: present
+  become: True
+
+- name: Push longhorn
+  shell: helm upgrade --install longhorn ./chart/ --create-namespace --namespace longhorn-system
+  environment:
+    KUBECONFIG: "{{ playbook_dir }}/fdns.conf"
+  args:
+    chdir: "{{ role_path }}/files/longhorn"
+  delegate_to: localhost
+  run_once: True
+
+- name: Install ingress
+  k8s:
+    state: present
+    definition: "{{ lookup('file', 'ingress.yml') }}"
+    namespace: longhorn-system
+  run_once: True

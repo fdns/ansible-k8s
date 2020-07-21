@@ -1,8 +1,8 @@
 ---
 # Shared config
 - hosts:
-  - tag_project_cloud
-  - slave
+  - tag_ansible_role_master
+  - tag_ansible_role_worker
   roles:
     - docker
     - ssh-keys
@@ -10,25 +10,26 @@
   become: true
 
 - hosts:
-  - tag_project_cloud
+  - tag_ansible_role_master
   roles:
     - kubeadm-master
     - cloudflare-dns
   become: true
 
 - hosts:
-  - tag_project_cloud
+  - tag_ansible_role_master
   roles:
     - kubernetes-users
 
 - hosts:
-  - slave
+  - tag_ansible_role_worker
   roles:
-    - kubeadm-slave
+  - kubeadm-slave
+  become: true
 
 # Extra services
 - hosts:
-  - tag_project_cloud
+  - tag_ansible_role_master
   roles:
   - kubernetes-services
   - sealed-secrets

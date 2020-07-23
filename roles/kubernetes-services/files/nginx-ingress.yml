@@ -298,6 +298,11 @@ spec:
         app.kubernetes.io/instance: ingress-nginx
         app.kubernetes.io/component: controller
     spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/master: ''
       dnsPolicy: ClusterFirst
       containers:
         - name: controller

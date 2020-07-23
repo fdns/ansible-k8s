@@ -40,6 +40,6 @@
   shell: kubectl apply -f https://docs.projectcalico.org/v3.11/manifests/calico.yaml
   when: not result.stat.exists
 
-- name: Allow the schedule of nodes in master
-  shell: kubectl taint nodes --all node-role.kubernetes.io/master-
-  when: not result.stat.exists
+#- name: Allow the schedule of nodes in master
+#  shell: kubectl taint nodes --all node-role.kubernetes.io/master-
+#  when: not result.stat.exists

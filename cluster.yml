@@ -33,4 +33,5 @@
   roles:
   - kubernetes-services
   - sealed-secrets
-  - longhorn
+  #- longhorn
+  - kubernetes-storage-local

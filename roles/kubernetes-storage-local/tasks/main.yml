@@ -1,0 +1,7 @@
+---
+- name: Install local-path-storage
+  k8s:
+    state: present
+    definition: "{{ lookup('file', 'local-path-storage.yaml') }}"
+    namespace: local-path-storage
+  run_once: True

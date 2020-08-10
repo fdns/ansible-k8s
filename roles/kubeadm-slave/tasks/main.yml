@@ -8,10 +8,17 @@
   shell: kubeadm config images pull
   when: not result.stat.exists
 
+- name: Generate cluster join token
+  shell: kubeadm token create --ttl 2m
+  delegate_to: "{{ groups.tag_ansible_role_master[0] }}"
+  run_once: true
+  when: not result.stat.exists
+  register: token
+
 - name: Initialize cluster slave
   shell: >
     kubeadm join \
-    --token {{ kubeadm_token }} \
+    --token {{ token.stdout }} \
     --discovery-token-unsafe-skip-ca-verification \
     k8s.espinoza.dev:6443
   when: not result.stat.exists

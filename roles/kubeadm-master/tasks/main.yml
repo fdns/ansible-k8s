@@ -11,9 +11,9 @@
 - name: Initialize cluster
   shell: >
     kubeadm init \
-    --token {{ kubeadm_token }} \
     --apiserver-cert-extra-sans k8s.espinoza.dev \
-    --token-ttl 10m \
+    --token-ttl 1m \ \
+    --skip-token-print \
     --pod-network-cidr 192.168.0.0/16
   when: not result.stat.exists
 
@@ -37,7 +37,7 @@
   when: not result.stat.exists
 
 - name: Apply Calico network
-  shell: kubectl apply -f https://docs.projectcalico.org/v3.11/manifests/calico.yaml
+  shell: kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml
   when: not result.stat.exists
 
 #- name: Allow the schedule of nodes in master

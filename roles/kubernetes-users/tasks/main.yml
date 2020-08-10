@@ -46,4 +46,4 @@
     && kubectl config set users.fdns.client-certificate-data {{ fdns_csr.stdout }} \
     && kubectl config set users.fdns.client-key-data {{ fdns_private_key }}
   delegate_to: localhost
-  #no_log: True
+  no_log: True

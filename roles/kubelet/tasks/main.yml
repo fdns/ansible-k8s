@@ -17,9 +17,9 @@
     disable_excludes: kubernetes
   vars:
     packages:
-    - kubelet
-    - kubeadm 
-    - kubectl
+    - kubelet-1.18.6-0
+    - kubeadm-1.18.6-0
+    - kubectl-1.18.6-0
     - iscsi-initiator-utils # LongHorn
   when: copy_data.changed
 

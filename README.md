@@ -5,12 +5,14 @@ All variables are defined in the default folder of their respective role, and ar
 
 ## Roles
 This playbook contains the following roles:
+- cloudflare-dns: Setup the new IP Addresses in cloudflare
 - docker: Setup docker for kubelet
 - kubelet: Kubelet service installation.
 - kubeadm-master: Single master setup using kubeadm.
 - kubeadm-slave: Node configuration for the k8s cluster.
 - kubernetes-user: Setup fdns user for external access, and generate a local *fdns.conf* file for access.
+- kubernetes-storage-local: Setup storage in local nodes.
+- sealed-secrets: Setup root key and sealed secrets service for secret management.
 - ssh-keys: Add ssh keys to the node.
-- wireguard: Setup wireguard server.
 
 The setup is completely automatic, and generates a working k8s cluster, where pods can be scheduled on master and slaves.

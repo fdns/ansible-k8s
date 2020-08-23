@@ -6,7 +6,7 @@
       working_directory: "{{ playbook_dir }}/../tmp/certificate"
       acme_directory: "{{ playbook_dir }}/../tmp/certificate/acme"
       domains:
-        - "edx.k8s.espinoza.dev"
+        - "*.k8s.espinoza.dev"
         - "*.edx.k8s.espinoza.dev"
 
   - name: Create working working directory

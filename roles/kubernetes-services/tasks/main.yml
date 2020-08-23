@@ -1,15 +1,22 @@
 ---
+- name: Apply psp
+  k8s:
+    state: present
+    definition: "{{ lookup('file', item) | from_yaml_all | list }}"
+  with_fileglob:
+    - "{{ role_path }}/files/psp/*.yaml"
+
 - name: Add metrics-service (Used by kubctl top node/pod and k9s)
   k8s:
     state: present
     definition: "{{ item }}"
-  loop: "{{ lookup('template', '{{ role_path }}/files/metrics-server.yml') | from_yaml_all | list }}"
+  loop: "{{ lookup('file', '{{ role_path }}/files/metrics-server.yml') | from_yaml_all | list }}"
 
 - name: Add nginx-ingress service
   k8s:
     definition: "{{ item }}"
     state: present
-  loop: "{{ lookup('template', '{{ role_path }}/files/nginx-ingress.yml') | from_yaml_all | list }}"
+  loop: "{{ lookup('file', '{{ role_path }}/files/nginx-ingress.yml') | from_yaml_all | list }}"
 
 #- name: Add cert-manager
 #  k8s:

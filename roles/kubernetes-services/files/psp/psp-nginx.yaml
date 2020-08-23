@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/instance: ingress-nginx
+---
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: policy-nginx
+  namespace: ingress-nginx
+spec:
+  privileged: false
+  hostNetwork: false
+  hostPorts:
+  - min: 80
+    max: 80
+  - min: 443
+    max: 443
+  - min: 8443
+    max: 8443
+  allowPrivilegeEscalation: true
+  defaultAllowPrivilegeEscalation: false
+  hostPID: false
+  hostIPC: false
+  runAsUser:
+    rule: RunAsAny
+  fsGroup:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  volumes:
+  - 'configMap'
+  - 'downwardAPI'
+  - 'emptyDir'
+  - 'persistentVolumeClaim'
+  - 'secret'
+  - 'projected'
+  allowedCapabilities:
+  - '*'
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: policy-nginx
+  namespace: ingress-nginx
+rules:
+- apiGroups:
+  - extensions
+  resources:
+  - podsecuritypolicies
+  resourceNames:
+  - policy-nginx
+  verbs:
+  - use
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: policy-nginx
+  namespace: ingress-nginx
+subjects:
+- kind: ServiceAccount
+  namespace: ingress-nginx
+  name: default
+- kind: ServiceAccount
+  namespace: ingress-nginx
+  name: ingress-nginx
+roleRef:
+  kind: Role
+  name: policy-nginx
+  namespace: ingress-nginx

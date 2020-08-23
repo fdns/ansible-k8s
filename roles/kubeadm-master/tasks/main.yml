@@ -36,8 +36,12 @@
     chown ec2-user:ec2-user /home/ec2-user/.kube/config
   when: not result.stat.exists
 
-- name: Apply Calico network
-  shell: kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml
+#- name: Apply Calico network
+#  shell: kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml
+#  when: not result.stat.exists
+
+- name: Apply weave network
+  shell: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
   when: not result.stat.exists
 
 #- name: Allow the schedule of nodes in master

@@ -1,11 +1,4 @@
 ---
-- name: Apply psp
-  k8s:
-    state: present
-    definition: "{{ lookup('file', item) | from_yaml_all | list }}"
-  with_fileglob:
-    - "{{ role_path }}/files/psp/*.yaml"
-
 - name: Add metrics-service (Used by kubctl top node/pod and k9s)
   k8s:
     state: present

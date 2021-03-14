@@ -10,13 +10,19 @@
   k8s:
     state: present
     definition: "{{ item }}"
-  loop: "{{ lookup('file', '{{ role_path }}/files/metrics-server.yml') | from_yaml_all | list }}"
+  loop: "{{ lookup('file', '{{ role_path }}/files/metrics-server.yaml') | from_yaml_all | list }}"
 
 - name: Add nginx-ingress service
   k8s:
     definition: "{{ item }}"
     state: present
-  loop: "{{ lookup('file', '{{ role_path }}/files/nginx-ingress.yml') | from_yaml_all | list }}"
+  loop: "{{ lookup('file', '{{ role_path }}/files/nginx-ingress.yaml') | from_yaml_all | list }}"
+
+- name: Add local storage
+  k8s:
+    definition: "{{ item }}"
+    state: present
+  loop: "{{ lookup('file', '{{ role_path }}/files/local-path-storage.yaml') | from_yaml_all | list }}"
 
 #- name: Add cert-manager
 #  k8s:
@@ -28,7 +34,7 @@
 #  k8s:
 #    definition: "{{ item }}"
 #    state: present
-#  loop: "{{ lookup('template', '{{ role_path }}/files/cert-manager-acme.yml') | from_yaml_all | list }}"
+#  loop: "{{ lookup('template', '{{ role_path }}/files/cert-manager-acme.yaml') | from_yaml_all | list }}"
 #  register: result
 #  retries: 5
 #  delay: 2

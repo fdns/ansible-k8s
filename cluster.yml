@@ -27,4 +27,3 @@
   - kubernetes-services
   - sealed-secrets
   #- longhorn
-  - kubernetes-storage-local

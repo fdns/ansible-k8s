@@ -4,10 +4,6 @@
     path: /etc/kubernetes/admin.conf
   register: result
 
-- name: Pull kubeadm images
-  shell: kubeadm config images pull
-  when: not result.stat.exists
-
 - name: Initialize cluster
   shell: >
     kubeadm init \

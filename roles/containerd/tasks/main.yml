@@ -1,0 +1,59 @@
+---
+- name: Setup modules
+  lineinfile:
+    dest: /etc/modules-load.d/containerd.conf
+    line: "{{ item }}"
+    create: yes
+  loop:
+  - overlay
+  - br_netfilter
+  become: true
+
+- name: Load modules
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  become: true
+  loop:
+  - overlay
+  - br_netfilter
+
+- name: Setup sysctl params
+  sysctl:
+    name: "{{ item }}"
+    value: "1"
+    sysctl_file: /etc/sysctl.d/99-kubernetes-cri.conf
+    state: present
+    reload: yes
+  loop:
+  - net.bridge.bridge-nf-call-iptables
+  - net.ipv4.ip_forward
+  - net.bridge.bridge-nf-call-ip6tables
+  become: true
+
+- name: Install containerd
+  yum:
+    name: containerd
+    state: present
+  become: true
+  register: containerd_install
+
+- name: Create containerd folder
+  file:
+    path: /etc/containerd
+    state: directory
+  become: true
+
+- name: Create containerd configuration
+  shell:
+    cmd: "containerd config default | tee /etc/containerd/config.toml"
+    creates: /etc/containerd/config.toml
+  become: true
+  register: containerd_config
+
+- name: Restart containerd
+  systemd:
+    name: containerd
+    state: restarted 
+  when: containerd_install.changed or containerd_config.changed
+  become: true

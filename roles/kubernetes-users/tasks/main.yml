@@ -12,7 +12,7 @@
   become: true
 
 - name: Add fdns certificate signing request
-  k8s:
+  kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'fdns-cert.yml') }}"
   register: csr
@@ -22,7 +22,7 @@
   when: csr.changed
 
 - name: Create fdns rolebind
-  k8s:
+  kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('file', 'fdns-role.yml') }}"
 

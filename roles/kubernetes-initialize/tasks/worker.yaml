@@ -1,0 +1,16 @@
+---
+- name: Check if cluster exists
+  stat:
+    path: /etc/kubernetes/kubelet.conf
+  register: result
+
+- name: Generate cluster join token
+  shell: kubeadm token create --print-join-command --ttl 2m
+  delegate_to: "{{ groups.tag_ansible_role_master[0] }}"
+  run_once: true
+  when: not result.stat.exists
+  register: token
+
+- name: Initialize cluster worker
+  shell: "{{ token.stdout }}"
+  when: not result.stat.exists

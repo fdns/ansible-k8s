@@ -1,0 +1,9 @@
+plugin: aws_ec2
+regions:
+  - us-east-2
+filters:
+  tag:project: cloud
+keyed_groups:
+  # Add hosts to tag_Name_Value groups for each Name/Value tag pair
+  - prefix: tag
+    key: tags

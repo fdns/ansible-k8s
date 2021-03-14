@@ -4,15 +4,14 @@
   - tag_ansible_role_master
   - tag_ansible_role_worker
   roles:
-    - docker
+    - containerd
     - ssh-keys
-    - kubelet
+    - kubernetes-initialize
   become: true
 
 - hosts:
   - tag_ansible_role_master
   roles:
-    - kubeadm-master
     - cloudflare-dns
   become: true
 
@@ -20,12 +19,6 @@
   - tag_ansible_role_master
   roles:
     - kubernetes-users
-
-- hosts:
-  - tag_ansible_role_worker
-  roles:
-  - kubeadm-slave
-  become: true
 
 # Extra services
 - hosts:

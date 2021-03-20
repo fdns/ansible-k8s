@@ -51,6 +51,9 @@
   become: true
   register: containerd_config
 
+- name: Add gvisor plugin
+  include_tasks: gvisor.yml
+
 - name: Restart containerd
   systemd:
     name: containerd

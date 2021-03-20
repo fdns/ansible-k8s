@@ -1,0 +1,40 @@
+---
+- name: Set version
+  set_fact:
+    gvisor_version: 20210315.0
+
+- name: Get runsc checksum
+  uri:
+    url: "https://storage.googleapis.com/gvisor/releases/release/{{ gvisor_version }}/{{ ansible_architecture }}/runsc.sha512"
+    return_content: yes
+  register: runsc_sha512
+
+- name: Get containerd shim runsc sha512
+  uri:
+    url: "https://storage.googleapis.com/gvisor/releases/release/{{ gvisor_version }}/{{ ansible_architecture }}/containerd-shim-runsc-v1.sha512"
+    return_content: yes
+  register: containerd_runsc_sha512
+
+- name: Download runsc
+  get_url:
+    url: "https://storage.googleapis.com/gvisor/releases/release/{{ gvisor_version }}/{{ ansible_architecture }}/runsc"
+    checksum: "sha512:{{ runsc_sha512.content.split(' ')[0] }}"
+    dest: /usr/local/bin/runsc
+    mode: "a+rx"
+  become: true
+
+- name: Download containerd shim runsc
+  get_url:
+    url: "https://storage.googleapis.com/gvisor/releases/release/{{ gvisor_version }}/{{ ansible_architecture }}/containerd-shim-runsc-v1"
+    checksum: "sha512:{{ containerd_runsc_sha512.content.split(' ')[0] }}"
+    dest: /usr/local/bin/containerd-shim-runsc-v1
+    mode: "a+rx"
+  become: true
+
+- name: Add configuration to containerd
+  blockinfile:
+    path: /etc/containerd/config.toml
+    block: |
+      [plugins.cri.containerd.runtimes.runsc]
+        runtime_type = "io.containerd.runsc.v1"
+  become: true
